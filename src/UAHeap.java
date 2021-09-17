@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -117,12 +119,13 @@ public class UAHeap {
 
     // Retrieves the min value from the heap
     public int getMinValue() {
-    	
+    	return a[0];
     }
 
     // Removes and returns the min value from the heap while preserving the heap properties
     public int removeMinValue() {
-
+    	//REMOVE LATER
+    	return -1;
     }
 
     // Builds the heap structure by starting from ((int) n/3)
@@ -147,7 +150,30 @@ public class UAHeap {
 
     // Reorganizes an element at the given index moving downward (if needed)
     public void heapifyDown(int index) {
+    	int leftChildIndex = getLeftChildIndex(index);
+    	int centerChildIndex = getCenterChildIndex(index);
+    	int rightChildIndex = getRightChildIndex(index);
+    	boolean leftInBounds = leftChildIndex < a.length;
+    	boolean centerInBounds = centerChildIndex < a.length;
+    	boolean rightInBounds = rightChildIndex < a.length;
     	
+    	if(leftChildIndex < size() /*check if no leaves*/ || (leftInBounds && a[index] > a[leftChildIndex]) || (centerInBounds && a[index] > a[centerChildIndex]) || (rightInBounds && a[index] > a[rightChildIndex])) {
+    		//swap with smallest value
+    		//set smallest to left child
+    		int smallestChildIndex = leftChildIndex;
+    		if(centerInBounds) { //if center index is in bounds, check against current smallest
+    			smallestChildIndex = getIndexWithSmallestValue(a, smallestChildIndex, centerChildIndex);
+    			if(rightInBounds) { //if right index is in bounds, check against current smallest
+    				smallestChildIndex = getIndexWithSmallestValue(a, smallestChildIndex, rightChildIndex);
+    			}
+    		}
+    		
+    		//smallestChildIndex is now correct
+    		//swap
+    		swapValues(a, index, smallestChildIndex);
+    		//smallestChildIndex now points to our moving-value's location in the array, recurse down
+    		heapifyDown(smallestChildIndex);
+    	}
     }
 
     // Decreases the value at the specified index and moves it upward (if needed).
@@ -157,10 +183,25 @@ public class UAHeap {
 
     // Loads data into the heap from a file (line-delimited)
     public void loadData(String filename) {
-    	
+    	File infile = new File(System.getProperty("user.dir") + "/" + filename);
+    	if(infile.exists()) {
+    		try {
+    			FileReader fr = new FileReader(infile);
+    			BufferedReader br = new BufferedReader(fr);
+    			String line;
+    			while((line = br.readLine()) != null) {
+    				int lineNum = Integer.parseInt(line);
+    				
+    			}
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    	} else {
+    		System.out.println("No file with name " + filename + " exists in running directory " + System.getProperty("user.dir"));
+    	}
     }
 
-    // Writes the contents of the heap into the specified file (line-delimited)
+    // Writes the contents of the heap into the specified file (space-delimited)
     public void saveDataToFile(String filename) {
     	File outfile = new File(System.getProperty("user.dir") + "/" + filename);
     	try {
@@ -177,13 +218,26 @@ public class UAHeap {
 
     // Returns the values from the heap in ascending order (and saves it to the array a)
     public int[] getSortedHeap() {
-    	
+    	//REMOVE THIS LINE LATER
+    	return new int[50];
     }
 
     /***********************************************************************
      * Location for additional methods needed to complete this problem set.
      ***********************************************************************/
 
+    private int getIndexWithSmallestValue(int[] array, int indexA, int indexB) {
+    	return array[indexA] < array[indexB] ? indexA : indexB;
+    }
+    
+    private void swapValues(int[] array, int indexA, int indexB) {
+    	int temp = indexA;
+    	array[indexA] = array[indexB];
+    	array[indexB] = temp;
+    	
+    	return;
+    }
+    
     private int getLeftChildIndex(int i) {
     	return 3 * i + 1;
     }
