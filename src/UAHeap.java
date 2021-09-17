@@ -153,14 +153,14 @@ public class UAHeap {
     	int leftChildIndex = getLeftChildIndex(index);
     	int centerChildIndex = getCenterChildIndex(index);
     	int rightChildIndex = getRightChildIndex(index);
-    	boolean leftInBounds = leftChildIndex < a.length;
-    	boolean centerInBounds = centerChildIndex < a.length;
-    	boolean rightInBounds = rightChildIndex < a.length;
+    	boolean leftInBounds = leftChildIndex < size();
+    	boolean centerInBounds = centerChildIndex < size();
+    	boolean rightInBounds = rightChildIndex < size();
     	
-    	if(leftChildIndex < size() /*check if no leaves*/ || (leftInBounds && a[index] > a[leftChildIndex]) || (centerInBounds && a[index] > a[centerChildIndex]) || (rightInBounds && a[index] > a[rightChildIndex])) {
+    	if((leftInBounds && a[index] > a[leftChildIndex]) || (centerInBounds && a[index] > a[centerChildIndex]) || (rightInBounds && a[index] > a[rightChildIndex])) {
     		//swap with smallest value
-    		//set smallest to left child
-    		int smallestChildIndex = leftChildIndex;
+    		//set smallest to left child or current moving value
+    		int smallestChildIndex = getIndexWithSmallestValue(a, index, leftChildIndex);
     		if(centerInBounds) { //if center index is in bounds, check against current smallest
     			smallestChildIndex = getIndexWithSmallestValue(a, smallestChildIndex, centerChildIndex);
     			if(rightInBounds) { //if right index is in bounds, check against current smallest
@@ -169,16 +169,23 @@ public class UAHeap {
     		}
     		
     		//smallestChildIndex is now correct
-    		//swap
-    		swapValues(a, index, smallestChildIndex);
-    		//smallestChildIndex now points to our moving-value's location in the array, recurse down
-    		heapifyDown(smallestChildIndex);
+    		if(smallestChildIndex != index) {
+	    		//swap
+	    		swapValues(a, index, smallestChildIndex);
+	    		//smallestChildIndex now points to our moving-value's location in the array, recurse down
+	    		heapifyDown(smallestChildIndex);
+    		}
     	}
     }
 
     // Decreases the value at the specified index and moves it upward (if needed).
     public void heapifyUp(int index, int value) {
-    	
+    	a[index] -= value;
+    	int parentIndex = getParentIndex(index);
+    	if(a[parentIndex] > a[index] && parentIndex >= 0 && parentIndex != index) {
+    		swapValues(a, index, parentIndex);
+    		heapifyUp(parentIndex, 0);
+    	}
     }
 
     // Loads data into the heap from a file (line-delimited)
