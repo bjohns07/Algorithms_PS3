@@ -124,21 +124,34 @@ public class UAHeap {
 
     // Removes and returns the min value from the heap while preserving the heap properties
     public int removeMinValue() {
-    	//REMOVE LATER
-    	return -1;
+    	int minValue = Integer.MIN_VALUE;
+    	if(a.length > 0) {
+    		minValue = a[0];
+    		//swap the last value and the root node
+    		swapValues(a, 0, size()-1);
+    		heapSize--;
+    		//heapify the new root to keep heap cohesive
+    		heapifyDown(0);
+    	} else {
+    		System.out.println("No data in heap, returning Integer.MIN_VALUE.");
+    	}
+    	
+    	return minValue;
     }
 
     // Builds the heap structure by starting from ((int) n/3)
     public void buildMinHeap() {
-    	
+    	int index = getLastNonLeafIndex();
+    	for(int i = index; i >= 0; i--) {
+    		heapifyDown(i);
+    	}
     }
 
     // Insert a value into the heap
     public void insertValue(int value) {
     	if(heapSize < a.length) {
     		a[heapSize] = value;
-    		
-    		
+    		heapifyUp(heapSize, 0);
     		heapSize++;
     	}
     }
@@ -196,10 +209,17 @@ public class UAHeap {
     			FileReader fr = new FileReader(infile);
     			BufferedReader br = new BufferedReader(fr);
     			String line;
-    			while((line = br.readLine()) != null) {
-    				int lineNum = Integer.parseInt(line);
-    				
+    			int index = 0;
+    			while((line = br.readLine()) != null && index < a.length) {
+    				try {
+    					int lineNum = Integer.parseInt(line);
+    					a[index] = lineNum;
+    					index++;
+    				} catch (NumberFormatException e) {
+    					e.printStackTrace();
+    				}
     			}
+    			heapSize = index;
     		} catch (IOException e) {
     			e.printStackTrace();
     		}
@@ -225,8 +245,18 @@ public class UAHeap {
 
     // Returns the values from the heap in ascending order (and saves it to the array a)
     public int[] getSortedHeap() {
-    	//REMOVE THIS LINE LATER
-    	return new int[50];
+    	int[] sortedHeap = new int[size()];
+    	int heapSizeBackup = size();
+    	int index = 0;
+    	while(heapSize > 0) {
+    		int minValueInHeap = removeMinValue();
+    		sortedHeap[index] = minValueInHeap;
+    		index++;
+    	}
+    	a = sortedHeap;
+    	heapSize = heapSizeBackup;
+    	
+    	return sortedHeap;
     }
 
     /***********************************************************************
@@ -238,11 +268,19 @@ public class UAHeap {
     }
     
     private void swapValues(int[] array, int indexA, int indexB) {
-    	int temp = indexA;
+    	int temp = array[indexA];
     	array[indexA] = array[indexB];
     	array[indexB] = temp;
     	
     	return;
+    }
+    
+    private int getLastNonLeafIndex() {
+    	return getParentIndex(size()-1);
+    }
+    
+    private int getLayerByIndex(int i) {
+    	return (int)logBase(3, i);
     }
     
     private int getLeftChildIndex(int i) {
